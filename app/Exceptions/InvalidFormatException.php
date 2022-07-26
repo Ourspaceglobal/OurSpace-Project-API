@@ -1,0 +1,29 @@
+<?php
+
+namespace App\Exceptions;
+
+use Exception;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use MarcinOrlowski\ResponseBuilder\ResponseBuilder;
+
+class InvalidFormatException extends Exception
+{
+    protected $message = 'Invalid format.';
+
+    /**
+     * Render the response.
+     *
+     * @param Request $request
+     * @return mixed
+     */
+    public function render(Request $request)
+    {
+        if ($request->is('api/*')) {
+            return ResponseBuilder::asError(100)
+                ->withHttpCode(Response::HTTP_NOT_ACCEPTABLE)
+                ->withMessage($this->getMessage())
+                ->build();
+        }
+    }
+}

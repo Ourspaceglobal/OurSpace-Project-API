@@ -1,0 +1,13 @@
+<?php
+
+namespace DummyNamespace;
+
+use BenSampo\Enum\Enum;
+
+/**
+ * @method static static OPTIONONE()
+ */
+final class DummyClass extends Enum
+{
+    public const OPTIONONE = 0;
+}

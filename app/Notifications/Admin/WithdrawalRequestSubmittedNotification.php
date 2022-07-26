@@ -1,0 +1,68 @@
+<?php
+
+namespace App\Notifications\Admin;
+
+use App\Models\WithdrawalRequest;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Notifications\Notification;
+
+class WithdrawalRequestSubmittedNotification extends Notification implements ShouldQueue
+{
+    use Queueable;
+
+    /**
+     * Create a new notification instance.
+     *
+     * @param WithdrawalRequest $withdrawalRequest
+     * @return void
+     */
+    public function __construct(public WithdrawalRequest $withdrawalRequest)
+    {
+        $this->onQueue('notifications');
+    }
+
+    /**
+     * Get the notification's delivery channels.
+     *
+     * @param mixed $notifiable
+     * @return array
+     */
+    public function via($notifiable)
+    {
+        return ['mail', 'database'];
+    }
+
+    /**
+     * Get the mail representation of the notification.
+     *
+     * @param mixed $notifiable
+     * @return \Illuminate\Notifications\Messages\MailMessage
+     */
+    public function toMail($notifiable)
+    {
+        return (new MailMessage())
+            ->subject('Withdrawal Request Submitted')
+            ->line("{$this->withdrawalRequest->user->full_name} has requested for ₦{$this->withdrawalRequest->amount} "
+            . "to be transferred into their bank account: {$this->withdrawalRequest->bankAccount->bank_name} - "
+            . "{$this->withdrawalRequest->bankAccount->account_number}");
+    }
+
+    /**
+     * Get the array representation of the notification.
+     *
+     * @param mixed $notifiable
+     * @return array
+     */
+    public function toArray($notifiable)
+    {
+        return [
+            'status' => true,
+            'message' => "{$this->withdrawalRequest->user->full_name} has requested for "
+            . "₦{$this->withdrawalRequest->amount} to be transferred into their bank account: "
+            . "{$this->withdrawalRequest->bankAccount->bank_name} - "
+            . "{$this->withdrawalRequest->bankAccount->account_number}",
+        ];
+    }
+}

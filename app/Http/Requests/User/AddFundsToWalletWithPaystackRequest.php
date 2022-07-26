@@ -1,0 +1,45 @@
+<?php
+
+namespace App\Http\Requests\User;
+
+use App\Enums\PaymentGateway;
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
+
+class AddFundsToWalletWithPaystackRequest extends FormRequest
+{
+    /**
+     * Determine if the user is authorized to make this request.
+     *
+     * @return bool
+     */
+    public function authorize()
+    {
+        return true;
+    }
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array
+     */
+    public function rules()
+    {
+        $user = $this->user();
+
+        return [
+            'amount' => 'required|numeric|min:100.00',
+            'callbackUrl' => [
+                Rule::requiredIf(!(bool) $this->payment_card_id),
+                'url',
+            ],
+            'payment_card_id' => [
+                'nullable',
+                Rule::exists('payment_cards', 'id')
+                    ->where('payment_gateway', PaymentGateway::PAYSTACK)
+                    ->where('user_type', $user->getMorphClass())
+                    ->where('user_id', $user->id),
+            ]
+        ];
+    }
+}
